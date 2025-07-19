@@ -1,10 +1,14 @@
-cmake_minimum_required(VERSION 3.22...4.0)
+cmake_minimum_required(VERSION 3.22)
 
 project(
-	naive-http
+	http
 	VERSION 0.1
-	DESCRIPTION "Naive implementation of multi-threaded HTTP server"
+	DESCRIPTION "multi-threaded HTTP server"
 	LANGUAGES CXX)
 
-add_subdirectory(apps)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+add_subdirectory(app)
 add_subdirectory(src)

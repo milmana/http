@@ -1,9 +1,9 @@
-#ifndef INCLUDE_NAIVE_HH
-#define INCLUDE_NAIVE_HH
+#ifndef INCLUDE_LIB_HH
+#define INCLUDE_LIB_HH
 
 #include <iostream>
 
-namespace naive {
+namespace lib {
 
 class worker_t {
 	int x;
@@ -17,4 +17,4 @@ public:
 
 }
 
-#endif // INCLUDE_NAIVE_HH
+#endif // INCLUDE_LIB_HH

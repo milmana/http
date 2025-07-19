@@ -1,6 +1,6 @@
-#include "naive.hh"
+#include "lib.hh"
 
-namespace naive {
+namespace lib {
 
 worker_t::worker_t() {
 	std::cout << "created " << this << std::endl;
