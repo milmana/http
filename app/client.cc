@@ -1,8 +1,8 @@
-// C++ headers
+// C++ includes
 #include <iostream>
 #include <system_error>
 
-// C headers
+// C includes
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -10,14 +10,14 @@
 #include <unistd.h>
 #include <cerrno>
 #include <cstring>
+#include <cstdlib>
 
-// local
-#include "lib.hh"
+// local includes
 
 int main(int argc, char **argv) {
 
-	auto sockfd = socket(AF_INET, SOCK_STREAM, 0); // tcp
-	if (sockfd < 0) {
+	auto fd = socket(AF_INET, SOCK_STREAM, 0); // tcp
+	if (fd < 0) {
 		throw std::system_error(errno, std::generic_category(), "socket");
 	}
 
@@ -32,15 +32,15 @@ int main(int argc, char **argv) {
 		throw std::system_error(errno, std::generic_category(), "inet_pton");
 	}
 
-	if (auto res = connect(sockfd, (struct sockaddr*)&addr, sizeof(addr)); res < 0) {
+	if (auto res = connect(fd, (struct sockaddr*)&addr, sizeof(addr)); res < 0) {
 		throw std::system_error(errno, std::generic_category(), "connect");
 	}
 
-	if (auto res = write(sockfd, "hello", 5); res < 0) {
+	if (auto res = write(fd, "hello", 5); res < 0) {
 		throw std::system_error(errno, std::generic_category(), "write");
 	}
 
-	close(sockfd);
+	close(fd);
 
 	return 0;
 }

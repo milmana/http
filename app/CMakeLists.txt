@@ -1,2 +1,2 @@
-add_executable(main main.cc)
-target_link_libraries(main PRIVATE lib)
+add_executable(client client.cc)
+add_executable(server server.cc)
