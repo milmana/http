@@ -16,18 +16,37 @@
 // local includes
 
 // classes
+#if 0
+		std::string http = "HTTP/1.1 200 OK\r\n"
+					"Content-Length: 5\r\n"
+					"Content-Type: text/plain\r\n"
+					"Connection: close\r\n"
+					"\r\n"
+					"hello";
+#endif
 
 class HTTP {
 public:
-	static std::string wrapper(std::string payload) {
-		std::stringstream ss;
-		ss << "HTTP/1.1 200 OK\r\n";
-		ss << "Content-Type: text/plain\r\n";
-		ss << "Content-Length: " + std::to_string(payload.size()) + "\r\n";
-		ss << "Connection: close\r\n";
-		ss << "\r\n";
-		ss << payload.c_str();
-		return ss.str();
+	static std::string test() {
+		return "HTTP/1.1 200 OK\r\n"
+			"Content-Length: 5\r\n"
+			"Content-Type: text/plain\r\n"
+			"Connection: close\r\n"
+			"\r\n"
+			"hello";
+	}
+	static void parse(std::string request) {
+		std::istringstream iss(request);
+		std::string method, path, version;
+		if (!(iss >> method >> path >> version)) {
+			throw std::runtime_error("malformed HTTP");
+		}
+		if (version.rfind("HTTP/", 0) != 0) {
+			throw std::runtime_error("invalid HTTP version");
+		}
+		std::cout << method << std::endl;
+		std::cout << path << std::endl;
+		std::cout << version << std::endl;
 	}
 };
 
@@ -81,15 +100,8 @@ int main(int argc, char **argv) {
 		char buf[bufsize];
 		ssize_t n = read(clientfd, buf, bufsize-1);
 
-#if 0
-		std::string http = "HTTP/1.1 200 OK\r\n"
-					"Content-Length: 5\r\n"
-					"Content-Type: text/plain\r\n"
-					"Connection: close\r\n"
-					"\r\n"
-					"hello";
-#endif
-		std::string http = HTTP::wrapper("yes, master");
+		HTTP::parse(std::string(buf, n));
+		std::string http = HTTP::test();
 		write(clientfd, http.c_str(), http.size());
 		close(clientfd);
 
