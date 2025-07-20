@@ -16,6 +16,15 @@
 
 int main(int argc, char **argv) {
 
+	if (argc < 4) {
+		std::cerr << "USAGE: test_client \"ip\" port \"msg\"" << std::endl;
+		return -1;
+	}
+
+	const char* ip_str = argv[1];
+	short int   port   = std::atoi(argv[2]);
+	const char* msg    = argv[3];
+
 	auto fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (fd < 0) {
 		throw std::system_error(errno, std::generic_category(), "socket");
@@ -23,9 +32,9 @@ int main(int argc, char **argv) {
 
 	sockaddr_in server_addr{};
 	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(12345);
+	server_addr.sin_port = htons(port);
 
-	if (auto res = inet_pton(AF_INET, "127.0.0.1", &server_addr.sin_addr); res < 0) {
+	if (auto res = inet_pton(AF_INET, ip_str, &server_addr.sin_addr); res < 0) {
 		throw std::system_error(errno, std::generic_category(), "inet_pton");
 	}
 
@@ -33,7 +42,7 @@ int main(int argc, char **argv) {
 		throw std::system_error(errno, std::generic_category(), "connect");
 	}
 
-	const char* msg = "you don't have the cards";
+	// const char* msg = "you don't have the cards";
 	if (auto res = write(fd, msg, strlen(msg)); res < 0) {
 		throw std::system_error(errno, std::generic_category(), "socket");
 	}

@@ -44,7 +44,6 @@ int main(int argc, char **argv) {
 
 	while (true) {
 
-
 		sockaddr_in client{};
 		socklen_t len = sizeof(client);
 		auto clientfd = accept(fd, (sockaddr*)&client, &len);
