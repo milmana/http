@@ -16,29 +16,29 @@
 
 int main(int argc, char **argv) {
 
-	auto fd = socket(AF_INET, SOCK_STREAM, 0); // tcp
+	auto fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (fd < 0) {
 		throw std::system_error(errno, std::generic_category(), "socket");
 	}
 
-	struct sockaddr_in addr = {0};
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons(8080);
-	if (auto res = inet_pton(AF_INET, "127.0.0.1", &addr.sin_addr); res == 1) {
-		// success
-	} else if (res == 0) {
-		throw std::runtime_error("inet_pton: invalid format");
-	} else { // res < 0
+	sockaddr_in server_addr{};
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_port = htons(12345);
+
+	if (auto res = inet_pton(AF_INET, "127.0.0.1", &server_addr.sin_addr); res < 0) {
 		throw std::system_error(errno, std::generic_category(), "inet_pton");
 	}
 
-	if (auto res = connect(fd, (struct sockaddr*)&addr, sizeof(addr)); res < 0) {
+	if (auto res = connect(fd, (sockaddr*)&server_addr, sizeof(server_addr)); res < 0) {
 		throw std::system_error(errno, std::generic_category(), "connect");
 	}
 
-	if (auto res = write(fd, "hello", 5); res < 0) {
-		throw std::system_error(errno, std::generic_category(), "write");
+	const char* msg = "you don't have the cards";
+	if (auto res = write(fd, msg, strlen(msg)); res < 0) {
+		throw std::system_error(errno, std::generic_category(), "socket");
 	}
+
+	std::cout << "message sent..." << std::endl;
 
 	close(fd);
 

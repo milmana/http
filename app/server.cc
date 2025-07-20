@@ -16,7 +16,7 @@
 
 int main(int argc, char **argv) {
 
-	auto fd = socket(AF_INET, SOCK_STREAM, 0); // tcp
+	auto fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (fd < 0) {
 		throw std::system_error(errno, std::generic_category(), "socket");
 	}
@@ -39,22 +39,28 @@ int main(int argc, char **argv) {
 		throw std::system_error(errno, std::generic_category(), "listen");
 	}
 
-	sockaddr_in client_addr{};
-	socklen_t client_len = sizeof(client_addr);
-	auto client_fd = accept(fd, (sockaddr*)&client_addr, &client_len);
-	if (client_fd < 0) {
-		throw std::system_error(errno, std::generic_category(), "accept");
-	}
-
-	std::cout << "client_addr connected..." << std::endl;
-
+	std::cout << "listening on 127.0.0.1:12345" << std::endl;
 	char buf[1024];
-	ssize_t n = read(client_fd, buf, sizeof(buf));
-	std::cout << "received: " << std::string(buf, n) << std::endl;
+
+	while (true) {
+
+
+		sockaddr_in client{};
+		socklen_t len = sizeof(client);
+		auto clientfd = accept(fd, (sockaddr*)&client, &len);
+		if (clientfd < 0) {
+			throw std::system_error(errno, std::generic_category(), "accept");
+		}
+
+		ssize_t n = read(clientfd, buf, sizeof(buf));
+		std::cout << std::string(buf, n) << std::endl;
+
+		close(clientfd);
+
+	}
 
 
 	close(fd);
-	close(client_fd);
 
 	return 0;
 }
