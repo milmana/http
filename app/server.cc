@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include <system_error>
+#include <unordered_map>
 
 // C includes
 #include <sys/types.h>
@@ -25,9 +26,47 @@
 					"hello";
 #endif
 
-class HTTP {
+class HttpRequest {
 public:
-	static std::string test() {
+
+	enum class HttpMethod {GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS, TRACE, CONNECT} method;
+	std::string target;
+	enum class HttpVersion {HTTP_11} version;
+	std::unordered_map<std::string, std::string> headers;
+	std::string body;
+
+	HttpRequest() : method(HttpMethod::GET), target("/"), version(HttpVersion::HTTP_11), headers({}), body("") {
+		std::cout << "HttpRequest " << this << std::endl;
+	}
+
+	HttpRequest(std::string incoming) {
+		std::cout << "HttpRequest " << this << std::endl;
+
+		std::istringstream is (incoming);
+
+		// preamble: method, target, version
+		std::string m, t, v;
+		if (!(is >> m >> t >> v)) {
+			throw std::runtime_error("preamble");
+		}
+		if (m == "GET") {
+			method = HttpMethod::GET;
+		} else {
+			throw std::runtime_error("http method not supported");
+		}
+		// target: TODO
+		if (v == "HTTP/1.1") {
+			version = HttpVersion::HTTP_11;
+		} else {
+			throw std::runtime_error("http version not supported");
+		}
+	}
+
+	~HttpRequest() {
+		std::cout << "HttpRequest " << this << " destroyed" << std::endl;
+	}
+
+	static std::string test_response() {
 		return "HTTP/1.1 200 OK\r\n"
 			"Content-Length: 5\r\n"
 			"Content-Type: text/plain\r\n"
@@ -35,19 +74,7 @@ public:
 			"\r\n"
 			"hello";
 	}
-	static void parse(std::string request) {
-		std::istringstream iss(request);
-		std::string method, path, version;
-		if (!(iss >> method >> path >> version)) {
-			throw std::runtime_error("malformed HTTP");
-		}
-		if (version.rfind("HTTP/", 0) != 0) {
-			throw std::runtime_error("invalid HTTP version");
-		}
-		std::cout << method << std::endl;
-		std::cout << path << std::endl;
-		std::cout << version << std::endl;
-	}
+
 };
 
 
@@ -89,7 +116,6 @@ int main(int argc, char **argv) {
 
 	while (true) {
 
-
 		sockaddr_in client{};
 		socklen_t len = sizeof(client);
 		auto clientfd = accept(fd, (sockaddr*)&client, &len);
@@ -100,9 +126,9 @@ int main(int argc, char **argv) {
 		char buf[bufsize];
 		ssize_t n = read(clientfd, buf, bufsize-1);
 
-		HTTP::parse(std::string(buf, n));
-		std::string http = HTTP::test();
-		write(clientfd, http.c_str(), http.size());
+		HttpRequest obj {};
+		std::string resp = obj.test_response();
+		write(clientfd, resp.c_str(), resp.size());
 		close(clientfd);
 
 	}
