@@ -27,7 +27,17 @@ int main(int argc, char* argv[]) {
 	if (auto status = getaddrinfo(argv[1], nullptr, &hints, &res); status != 0) {
 		throw std::system_error(errno, std::system_category(), gai_strerror(status));
 	}
+	for (auto p = res; p != nullptr; ++p) {
+		if (p->ai_family == AF_INET) { // IPv4
+			auto ipv4 = (struct sockaddr_in *)p->ai_addr;
+			auto addr = &(ipv4->sin_addr);
+		} else { // IPv6
+			auto ipv6 = (struct sockaddr_in6 *)p->ai_addr;
+			auto addr = &(ipv6->sin6_addr);
+		}
+	}
+	freeaddrinfo(res);
 
-	char ipstr[INET6_ADDRSTRLEN];
+	// char ipstr[INET6_ADDRSTRLEN];
 
 }
